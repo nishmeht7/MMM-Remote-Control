@@ -171,7 +171,7 @@ module.exports = {
         });
 
         //edit config, payload is completely new config object with your changes(edits).
-        this.expressRouter.route('/editconfig')
+        this.expressRouter.route('/saveconfig')
             .get((req, res) => {
                 res.status(400).json({ success: false, message: "Invalid method, use PUT" });
             })
