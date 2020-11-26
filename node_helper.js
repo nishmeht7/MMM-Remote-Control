@@ -43,6 +43,8 @@ module.exports = NodeHelper.create(Object.assign({
 
             this.configOnHd = {};
             this.configData = {};
+            this.presetConfigList = [];
+            this.savedConfigList = [];
 
             this.waiting = [];
 
@@ -57,6 +59,7 @@ module.exports = NodeHelper.create(Object.assign({
             });
 
             this.combineConfig();
+            this.loadConfigList();
             this.updateModuleList();
             this.createRoutes();
 
@@ -113,6 +116,36 @@ module.exports = NodeHelper.create(Object.assign({
             }
 
             this.loadTranslation(this.configOnHd.language);
+        },
+
+        loadConfigList: function() {
+            // function copied from MichMich (MIT)
+            var defaults = require(__dirname + "/../../js/defaults.js");
+            var presetDir = path.resolve(__dirname + "/../../config/preset/");
+            var savedDir = path.resolve(__dirname + "/../../config/saved/");
+
+            this.presetConfigList = [];
+            this.savedConfigList = [];
+            try {
+				fs.readdirSync(presetDir).forEach(file => {
+					var c = require(presetDir + "/" + file);
+					var config = Object.assign({}, defaults, c);
+					this.presetConfigList.push(config);
+				});
+				fs.readdirSync(savedDir).forEach(file => {
+					var c = require(savedDir + "/" + file);
+					var config = Object.assign({}, defaults, c);
+					this.savedConfigList.push(config);
+				});
+            } catch (e) {
+                if (e.code == "ENOENT") {
+                    console.error("MMM-Remote-Control WARNING! Could not find config file.");
+                } else if (e instanceof ReferenceError || e instanceof SyntaxError) {
+                    console.error("MMM-Remote-Control WARNING! Could not validate config file. Please correct syntax errors. Starting with default configuration.");
+                } else {
+                    console.error("MMM-Remote-Control WARNING! Could not load config file. Error found: " + e);
+                }
+            }
         },
 
         createRoutes: function() {
@@ -364,6 +397,52 @@ module.exports = NodeHelper.create(Object.assign({
             return config;
         },
 
+        getConfigList: function() {
+            var configList = {};
+            configList.preset = this.presetConfigList;
+            configList.saved = this.savedConfigList;
+
+            for (let i = 0; i < configList.preset.length; i++) {
+            	var file = configList.preset[i];
+				for (let j = 0; j < file.modules.length; j++) {
+					var current = file.modules[j];
+					var def = Module.configDefaults[current.module];
+					if (!("config" in current)) {
+						current.config = {};
+					}
+					if (!def) {
+						def = {};
+					}
+					for (var key in def) {
+						if (!(key in current.config)) {
+							current.config[key] = def[key];
+						}
+					}
+				}
+            }
+
+            for (let i = 0; i < configList.saved.length; i++) {
+            	var file = configList.saved[i];
+				for (let j = 0; j < file.modules.length; j++) {
+					var current = file.modules[j];
+					var def = Module.configDefaults[current.module];
+					if (!("config" in current)) {
+						current.config = {};
+					}
+					if (!def) {
+						def = {};
+					}
+					for (var key in def) {
+						if (!(key in current.config)) {
+							current.config[key] = def[key];
+						}
+					}
+				}
+            }
+
+            return configList;
+        },
+
         removeDefaultValues: function(config) {
             // remove cached version
             delete require.cache[require.resolve(__dirname + "/../../js/defaults.js")];
@@ -500,6 +579,10 @@ module.exports = NodeHelper.create(Object.assign({
             }
             if (query.data === "config") {
                 this.sendResponse(res, undefined, { query: query, data: this.getConfig() });
+                return;
+            }
+            if (query.data === "configList") {
+                this.sendResponse(res, undefined, { query: query, data: this.getConfigList() });
                 return;
             }
             if (query.data === "defaultConfig") {
@@ -766,7 +849,7 @@ module.exports = NodeHelper.create(Object.assign({
                 return;
             }
             if (query.action === "DELAYED") {
-                /* Expects a nested query object 
+                /* Expects a nested query object
                  *   {
                  *       action: "DELAYED",
                  *       did: "SOME_UNIQUE_ID",

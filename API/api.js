@@ -15,7 +15,7 @@ const bodyParser = require("body-parser");
 const express = require("express");
 
 module.exports = {
-    /* getApiKey 
+    /* getApiKey
      * Middleware method for ExpressJS to check if an API key is provided.
      * Only checks for an API key if one is defined in the module's config section.
      */
@@ -110,22 +110,6 @@ module.exports = {
         // Can be passed as a header "Authorization: apiKey YOURAPIKEY"
         // or can be passed in the url ?apiKey=YOURAPIKEY
         this.expressRouter.use((req, res, next) => {
-            if (typeof this.apiKey !== "undefined") {
-                if (!("authorization" in req.headers) || req.headers.authorization.indexOf("apiKey") === -1) {
-                    // API Key was not provided as a header. Check the URL.
-                    var query = url.parse(req.url, true).query;
-                    if ("apiKey" in query) {
-                        if (query.apiKey !== this.apiKey) {
-                            return res.status(401).json({ success: false, message: "Unauthorized: Wrong API Key Provided!" });
-                        }
-                    } else {
-                        return res.status(403).json({ success: false, message: "Forbidden: API Key Not Provided!" });
-                    }
-                } else if (req.headers.authorization.split(" ")[1] !== this.apiKey) {
-                    return res.status(401).json({ success: false, message: "Unauthorized: Wrong API Key Provided!" });
-                }
-            }
-
             // Check for correct Content-Type header:
             if (req.method === "POST" && !req.is('application/json')) {
                 res.status(400).json({ success: false, message: "Incorrect content-type, must be 'application/json'" });
@@ -148,7 +132,8 @@ module.exports = {
             '/brightness',
             '/translations',
             '/mmUpdateAvailable',
-            '/config'
+            '/config',
+            '/configList'
         ]).get((req, res) => {
             let r = req.path.substring(1);
             r = r.replace(/\/([a-z])/, function(v) { return v.substring(1).toUpperCase(); });
