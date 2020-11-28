@@ -168,6 +168,30 @@ module.exports = {
                 }
             });
 
+        this.expressRouter.route('/saveTemplate')
+            .get((req, res) => {
+                res.status(400).json({ success: false, message: "Invalid method, use PUT" });
+            })
+            .post((req, res) => {
+                if (typeof req.body !== 'undefined' && "payload" in req.body) {
+                    this.answerPost({ data: "saveTemplate" }, { body: req.body.payload }, res);
+                } else {
+                    res.status(400).json({ success: false, message: "Invalid URL provided in request body" });
+                }
+            });
+
+        this.expressRouter.route('/deleteTemplate')
+            .get((req, res) => {
+                res.status(400).json({ success: false, message: "Invalid method, use PUT" });
+            })
+            .post((req, res) => {
+                if (typeof req.body !== 'undefined' && "payload" in req.body) {
+                    this.answerPost({ data: "deleteTemplate" }, { body: req.body.payload }, res);
+                } else {
+                    res.status(400).json({ success: false, message: "Invalid URL provided in request body" });
+                }
+            });
+
         this.expressRouter.route('/userpresence/:value')
             .get((req, res) => {
                 if (req.params.value) {
