@@ -15,7 +15,7 @@ const bodyParser = require("body-parser");
 const express = require("express");
 
 module.exports = {
-    /* getApiKey 
+    /* getApiKey
      * Middleware method for ExpressJS to check if an API key is provided.
      * Only checks for an API key if one is defined in the module's config section.
      */
@@ -148,7 +148,8 @@ module.exports = {
             '/brightness',
             '/translations',
             '/mmUpdateAvailable',
-            '/config'
+            '/config',
+            '/configList'
         ]).get((req, res) => {
             let r = req.path.substring(1);
             r = r.replace(/\/([a-z])/, function(v) { return v.substring(1).toUpperCase(); });
@@ -178,6 +179,30 @@ module.exports = {
             .post((req, res) => {
                 if (typeof req.body !== 'undefined' && "payload" in req.body) {
                     this.answerPost({ data: "config" }, { body: req.body.payload }, res);
+                } else {
+                    res.status(400).json({ success: false, message: "Invalid URL provided in request body" });
+                }
+            });
+
+        this.expressRouter.route('/saveTemplate')
+            .get((req, res) => {
+                res.status(400).json({ success: false, message: "Invalid method, use PUT" });
+            })
+            .post((req, res) => {
+                if (typeof req.body !== 'undefined' && "payload" in req.body) {
+                    this.answerPost({ data: "saveTemplate" }, { body: req.body.payload }, res);
+                } else {
+                    res.status(400).json({ success: false, message: "Invalid URL provided in request body" });
+                }
+            });
+
+        this.expressRouter.route('/deleteTemplate')
+            .get((req, res) => {
+                res.status(400).json({ success: false, message: "Invalid method, use PUT" });
+            })
+            .post((req, res) => {
+                if (typeof req.body !== 'undefined' && "payload" in req.body) {
+                    this.answerPost({ data: "deleteTemplate" }, { body: req.body.payload }, res);
                 } else {
                     res.status(400).json({ success: false, message: "Invalid URL provided in request body" });
                 }
