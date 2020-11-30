@@ -43,7 +43,6 @@ module.exports = NodeHelper.create(Object.assign({
 
             this.configOnHd = {};
             this.configData = {};
-            this.presetConfigList = [];
             this.savedConfigList = [];
 
             this.waiting = [];
@@ -121,19 +120,10 @@ module.exports = NodeHelper.create(Object.assign({
         loadConfigList: function() {
             // function copied from MichMich (MIT)
             var defaults = require(__dirname + "/../../js/defaults.js");
-            var presetDir = path.resolve(__dirname + "/../../config/preset/");
             var savedDir = path.resolve(__dirname + "/../../config/saved/");
 
-            this.presetConfigList = [];
             this.savedConfigList = [];
             try {
-				fs.readdirSync(presetDir).forEach(file => {
-					var c = require(presetDir + "/" + file);
-					var config = Object.assign({}, defaults, c);
-					config.type = "preset";
-					config.filename = file;
-					this.presetConfigList.push(config);
-				});
 				fs.readdirSync(savedDir).forEach(file => {
 					var c = require(savedDir + "/" + file);
 					var config = Object.assign({}, defaults, c);
@@ -403,27 +393,7 @@ module.exports = NodeHelper.create(Object.assign({
 
         getConfigList: function() {
             var configList = {};
-            configList.preset = this.presetConfigList;
             configList.saved = this.savedConfigList;
-
-            for (let i = 0; i < configList.preset.length; i++) {
-            	var file = configList.preset[i];
-				for (let j = 0; j < file.modules.length; j++) {
-					var current = file.modules[j];
-					var def = Module.configDefaults[current.module];
-					if (!("config" in current)) {
-						current.config = {};
-					}
-					if (!def) {
-						def = {};
-					}
-					for (var key in def) {
-						if (!(key in current.config)) {
-							current.config[key] = def[key];
-						}
-					}
-				}
-            }
 
             for (let i = 0; i < configList.saved.length; i++) {
             	var file = configList.saved[i];
