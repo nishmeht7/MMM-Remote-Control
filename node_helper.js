@@ -125,7 +125,7 @@ module.exports = NodeHelper.create(Object.assign({
             this.savedConfigList = [];
             try {
 				fs.readdirSync(savedDir).forEach(file => {
-					if(file === 'README') continue;
+					if(file === 'README') return;
 					var c = require(savedDir + "/" + file);
 					var config = Object.assign({}, defaults, c);
 					config.type = "saved";
