@@ -6,7 +6,28 @@
     "author": "MichMich",
     "desc": "Module to help developers to start building their own modules for the MagicMirror."
   },
-  {
+	{
+		"longname": "MMM-WifiPassword",
+		"id": "TeraTech/MMM-WifiPassword",
+		"url": "https://github.com/TeraTech/MMM-WiFiPassword",
+		"author": "TeraTech",
+		"desc": "Module to display your wifi as a barcode for guests to scan and login"
+	},
+	{
+		"longname": "MMM-AQI",
+		"id": "ryck/MMM-AQI",
+		"url": "https://github.com/ryck/MMM-AQI",
+		"author": "ryck",
+		"desc": "Module to display AQI of your current location"
+	},
+	{
+		"longname": "MMM-MyStandings",
+		"id": "vincep5/MMM-MyStandings",
+		"url": "https://github.com/vincep5/MMM-MyStandings",
+		"author": "vincep5",
+		"desc": "Module to get ESPN standings for the major US sports"
+	},
+	{
     "longname": "MMM-Button",
     "id": "ptrbld/MMM-Button",
     "url": "https://github.com/ptrbld/MMM-Button",
