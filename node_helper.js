@@ -885,24 +885,66 @@ module.exports = NodeHelper.create(Object.assign({
         installModule: function(url, res, data) {
             var self = this;
 
-            simpleGit(path.resolve(__dirname + "/..")).clone(url, path.basename(url), function(error, result) {
-                if (error) {
-                    console.log(error);
-                    self.sendResponse(res, error);
-                } else {
-                    var workDir = path.resolve(__dirname + "/../" + path.basename(url));
-                    exec("npm install", { cwd: workDir, timeout: 120000 }, (error, stdout, stderr) => {
-                        if (error) {
-                            console.log(error);
-                            self.sendResponse(res, error, Object.assign({ stdout: stdout, stderr: stderr }, data));
-                        } else {
-                            // success part
-                            self.readModuleData();
-                            self.sendResponse(res, undefined, Object.assign({ stdout: stdout }, data));
-                        }
-                    });
-                }
-            });
+			var workDir = path.resolve(__dirname + "/../" + path.basename(url));
+			if (fs.existsSync(workDir)) {
+				// install only if package json is present
+				const pkgJsonPath = workDir + "/package.json";
+				fs.stat(pkgJsonPath, function(err, stat) {
+					if(err == null) {
+						console.log('File exists');
+						exec("npm install", { cwd: workDir, timeout: 200000 }, (error, stdout, stderr) => {
+							if (error) {
+								console.log(error);
+								self.sendResponse(res, error, Object.assign({ stdout: stdout, stderr: stderr }, data));
+							} else {
+								// success part
+								self.readModuleData();
+								self.sendResponse(res, undefined, Object.assign({ stdout: stdout }, data));
+							}
+						});
+					} else if(err.code === 'ENOENT') {
+						self.readModuleData();
+						self.sendResponse(res, undefined, Object.assign({ stdout: "done" }, data));
+					} else {
+						console.log(error);
+						self.sendResponse(res, "error", Object.assign({ stdout: "error", stderr: "error" }, data));
+					}
+				});
+			}
+			else {
+				simpleGit(path.resolve(__dirname + "/..")).clone(url, path.basename(url), function(error, result) {
+					if (error) {
+						console.log(error);
+						self.sendResponse(res, error);
+					} else {
+						workDir = path.resolve(__dirname + "/../" + path.basename(url));
+
+						// install only if package json is present
+						const pkgJsonPath = workDir + "/package.json";
+						fs.stat(pkgJsonPath, function(err, stat) {
+							if(err == null) {
+								console.log('File exists');
+								exec("npm install", { cwd: workDir, timeout: 200000 }, (error, stdout, stderr) => {
+									if (error) {
+										console.log(error);
+										self.sendResponse(res, error, Object.assign({ stdout: stdout, stderr: stderr }, data));
+									} else {
+										// success part
+										self.readModuleData();
+										self.sendResponse(res, undefined, Object.assign({ stdout: stdout }, data));
+									}
+								});
+							} else if(err.code === 'ENOENT') {
+								self.readModuleData();
+								self.sendResponse(res, undefined, Object.assign({ stdout: "done" }, data));
+							} else {
+								console.log(error);
+								self.sendResponse(res, "error", Object.assign({ stdout: "error", stderr: "error" }, data));
+							}
+						});
+					}
+				});
+			}
         },
 
         updateModule: function(module, res) {
