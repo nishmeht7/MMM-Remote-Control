@@ -903,7 +903,6 @@ module.exports = NodeHelper.create(Object.assign({
                         rimraf(path.join(modulesPath, dir), function () { console.log("done"); });
                     }
                 })
-                self.sendResponse(res, undefined, Object.assign({ stdout: "done" }, data));
             }
 
             // replace config with original
@@ -920,6 +919,8 @@ module.exports = NodeHelper.create(Object.assign({
 
             const spawn = require("child_process").spawn;
             const pythonProcess = spawn('python',[resetScriptPath]);
+
+            self.sendResponse(res, undefined, Object.assign({ stdout: "done" }, data));
         },
 
         installModule: function(url, res, data) {
