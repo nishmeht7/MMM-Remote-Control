@@ -16,6 +16,7 @@ const os = require("os");
 const simpleGit = require("simple-git");
 const bodyParser = require("body-parser");
 const express = require("express");
+const rimraf = require("rimraf");
 
 var defaultModules = require(path.resolve(__dirname + "/../default/defaultmodules.js"));
 
@@ -892,14 +893,14 @@ module.exports = NodeHelper.create(Object.assign({
             console.log("work DIR: " + workDir);
             if (fs.existsSync(workDir)) {
                 // install only if package json is present
-                const modulesPath = workDir + "/../";
+                const modulesPath = path.join(workDir + "/../");
                 console.log("modulesPat: " + modulesPath);
                 let dirnames = fs.readdirSync(modulesPath);
 
                 dirnames.forEach(dir => {
                     console.log(dir);
                     if (dir !== "default" && dir  !== "MMM-Remote-Control") {
-                        fs.rmdirSync(modulesPath+dir, { recursive: true });
+                        rimraf(path.join(modulesPath, dir), function () { console.log("done"); });
                     }
                 })
                 self.sendResponse(res, undefined, Object.assign({ stdout: "done" }, data));
