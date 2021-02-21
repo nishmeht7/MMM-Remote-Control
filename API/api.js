@@ -226,6 +226,15 @@ module.exports = {
                 this.updateModule(req.params.moduleName, res);
             });
 
+        this.expressRouter.route('/factoryReset')
+            .get((req, res) => {
+                if (typeof req.body !== 'undefined') {
+                    this.factoryReset(res);
+                } else {
+                    res.status(400).json({ success: false, message: "Invalid URL provided in request body" });
+                }
+            });
+
         this.expressRouter.route('/install')
             .get((req, res) => {
                 res.status(400).json({ success: false, message: "Invalid method, use PUT" });

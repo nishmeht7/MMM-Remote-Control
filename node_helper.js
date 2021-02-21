@@ -883,6 +883,44 @@ module.exports = NodeHelper.create(Object.assign({
             return false;
         },
 
+        factoryReset: function(res, data) {
+            var self = this;
+            console.log("inside factory RESET");
+
+            // delete all non default modules except MMM-RC
+            var workDir = path.resolve(__dirname);
+            console.log("work DIR: " + workDir);
+            if (fs.existsSync(workDir)) {
+                // install only if package json is present
+                const modulesPath = workDir + "/../";
+                console.log("modulesPat: " + modulesPath);
+                let dirnames = fs.readdirSync(modulesPath);
+
+                dirnames.forEach(dir => {
+                    console.log(dir);
+                    if (dir !== "default" && dir  !== "MMM-Remote-Control") {
+                        fs.rmdirSync(modulesPath+dir, { recursive: true });
+                    }
+                })
+                self.sendResponse(res, undefined, Object.assign({ stdout: "done" }, data));
+            }
+
+            // replace config with original
+            let originalConfig = workDir +  "/../../config/config.js.sample";
+            let currConfig = workDir  + "/../../config/config.js";
+
+            fs.copyFile(originalConfig, currConfig, (err) => {
+                if (err) throw err;
+                console.log('config.js.sample was copied to config.js');
+            });
+
+            // call raspiWifi reboot script
+            let resetScriptPath = workDir + "/../../../RaspiWiFi/libs/reset_device/reset_lib.py"
+
+            const spawn = require("child_process").spawn;
+            const pythonProcess = spawn('python',[resetScriptPath]);
+        },
+
         installModule: function(url, res, data) {
             var self = this;
 
