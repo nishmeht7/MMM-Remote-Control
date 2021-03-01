@@ -915,7 +915,7 @@ module.exports = NodeHelper.create(Object.assign({
             });
 
             // call raspiWifi reboot script
-            let resetScriptPath = workDir + "/../../../RaspiWiFi/libs/reset_device/reset_lib.py"
+            let resetScriptPath = workDir + "/../../../RaspiWiFi/libs/reset_device/manual_reset.py"
 
             const spawn = require("child_process").spawn;
             const pythonProcess = spawn('python',[resetScriptPath]);
