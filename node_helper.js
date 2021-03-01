@@ -917,8 +917,15 @@ module.exports = NodeHelper.create(Object.assign({
             // call raspiWifi reboot script
             let resetScriptPath = workDir + "/../../../RaspiWiFi/libs/reset_device/manual_reset.py"
 
+            console.log("path: " + resetScriptPath);
+
             const spawn = require("child_process").spawn;
             const pythonProcess = spawn('python',[resetScriptPath]);
+
+            // Handle normal output
+            pythonProcess.stdout.on('data', (data) => {
+                console.log(String.fromCharCode.apply(null, data));
+            });
 
             self.sendResponse(res, undefined, Object.assign({ stdout: "done" }, data));
         },
