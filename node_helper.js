@@ -927,6 +927,11 @@ module.exports = NodeHelper.create(Object.assign({
                 console.log(String.fromCharCode.apply(null, data));
             });
 
+            // Handle error
+            pythonProcess.stderr.on('data', (data) => {
+                console.log(String.fromCharCode.apply(null, data));
+            });
+
             self.sendResponse(res, undefined, Object.assign({ stdout: "done" }, data));
         },
 
