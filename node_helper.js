@@ -886,19 +886,14 @@ module.exports = NodeHelper.create(Object.assign({
 
         factoryReset: function(res, data) {
             var self = this;
-            console.log("inside factory RESET");
-
             // delete all non default modules except MMM-RC
             var workDir = path.resolve(__dirname);
-            console.log("work DIR: " + workDir);
             if (fs.existsSync(workDir)) {
                 // install only if package json is present
                 const modulesPath = path.join(workDir + "/../");
-                console.log("modulesPat: " + modulesPath);
                 let dirnames = fs.readdirSync(modulesPath);
 
                 dirnames.forEach(dir => {
-                    console.log(dir);
                     if (dir !== "default" && dir  !== "MMM-Remote-Control") {
                         rimraf(path.join(modulesPath, dir), function () { console.log("done"); });
                     }
@@ -917,10 +912,8 @@ module.exports = NodeHelper.create(Object.assign({
             // call raspiWifi reboot script
             let resetScriptPath = "/home/pi/Desktop/RaspiWifi/libs/reset_device/manual_reset.py"
 
-            console.log("path: " + resetScriptPath);
-
             const spawn = require("child_process").spawn;
-            const pythonProcess = spawn('python',[resetScriptPath]);
+            const pythonProcess = spawn('sudo python3',[resetScriptPath]);
 
             // Handle normal output
             pythonProcess.stdout.on('data', (data) => {
