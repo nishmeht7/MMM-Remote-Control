@@ -888,44 +888,53 @@ module.exports = NodeHelper.create(Object.assign({
             var self = this;
             // delete all non default modules except MMM-RC
             var workDir = path.resolve(__dirname);
-            if (fs.existsSync(workDir)) {
-                // install only if package json is present
-                const modulesPath = path.join(workDir + "/../");
-                let dirnames = fs.readdirSync(modulesPath);
+            try {
+                if (fs.existsSync(workDir)) {
+                    // install only if package json is present
+                    const modulesPath = path.join(workDir + "/../");
+                    let dirnames = fs.readdirSync(modulesPath);
 
-                dirnames.forEach(dir => {
-                    if (dir !== "default" && dir  !== "MMM-Remote-Control") {
-                        rimraf(path.join(modulesPath, dir), function () { console.log("done"); });
-                    }
-                })
+                    dirnames.forEach(dir => {
+                        if (dir !== "default" && dir !== "MMM-Remote-Control") {
+                            rimraf(path.join(modulesPath, dir), function () {
+                                console.log("done");
+                            });
+                        }
+                    })
+                }
+
+                // replace config with original
+                let originalConfig = workDir + "/../../config/config.js.sample";
+                let currConfig = workDir + "/../../config/config.js";
+
+                fs.copyFile(originalConfig, currConfig, (err) => {
+                    if (err) throw err;
+                    console.log('config.js.sample was copied to config.js');
+                });
+
+                // call raspiWifi reboot script
+                let resetScriptPath = "/home/pi/Desktop/RaspiWifi/libs/reset_device/manual_reset.py"
+
+                const spawn = require("child_process").spawn;
+                const pythonProcess = spawn('sudo python3', [resetScriptPath]);
+
+                // Handle normal output
+                pythonProcess.stdout.on('data', (data) => {
+                    console.log(String.fromCharCode.apply(null, data));
+                });
+
+                // Handle error
+                pythonProcess.stderr.on('data', (data) => {
+                    console.log(String.fromCharCode.apply(null, data));
+                    self.sendResponse(res, undefined, Object.assign( {stdout: "error"}, data));
+                });
+
+                self.sendResponse(res, undefined, Object.assign( {stdout: "done"}, data));
             }
-
-            // replace config with original
-            let originalConfig = workDir +  "/../../config/config.js.sample";
-            let currConfig = workDir  + "/../../config/config.js";
-
-            fs.copyFile(originalConfig, currConfig, (err) => {
-                if (err) throw err;
-                console.log('config.js.sample was copied to config.js');
-            });
-
-            // call raspiWifi reboot script
-            let resetScriptPath = "/home/pi/Desktop/RaspiWifi/libs/reset_device/manual_reset.py"
-
-            const spawn = require("child_process").spawn;
-            const pythonProcess = spawn('sudo python3',[resetScriptPath]);
-
-            // Handle normal output
-            pythonProcess.stdout.on('data', (data) => {
-                console.log(String.fromCharCode.apply(null, data));
-            });
-
-            // Handle error
-            pythonProcess.stderr.on('data', (data) => {
-                console.log(String.fromCharCode.apply(null, data));
-            });
-
-            self.sendResponse(res, undefined, Object.assign({ stdout: "done" }, data));
+            catch (e) {
+                console.log("error going through with factoy reset: ", e);
+                self.sendResponse(res, undefined, Object.assign({stdout: "error"}, data));
+            }
         },
 
         installModule: function(url, res, data) {
