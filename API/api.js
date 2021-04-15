@@ -283,6 +283,21 @@ module.exports = {
 
         this.expressRouter.route('/timers').get((req, res) => { this.sendResponse(res, undefined, this.delayedQueryTimers); });
 
+        this.expressRouter.route('/cities')
+            .get((req, res) => {
+                res.status(400).json({ success: false, message: "Invalid method, use PUT" });
+            })
+            .post((req, res) => {
+                if (typeof req.body !== 'undefined' && "query" in req.body) {
+                    let city_file = path.resolve(__dirname + "/../uscity.list.min.json")
+                    let cities = JSON.parse(fs.readFileSync(city_file, "utf8"));
+                    let regex = new RegExp(req.body.query, 'i');
+                    res.status(200).json({ success: true, cities: cities.filter(c => c.country == "US" && (c.name + ", " + c.state).match(regex)) });
+                } else {
+                    res.status(400).json({ success: false, message: "Invalid URL provided in request body" });
+                }
+            });
+
         this.expressApp.use('/api', this.expressRouter);
 
         this.getExternalApiByGuessing();
